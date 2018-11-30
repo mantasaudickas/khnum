@@ -22,7 +22,7 @@ namespace Khnum.Tests.AspNetCore
         {
             var options = new PostgreSqlBusOptions
             {
-                ConnectionString = "Server=127.0.0.1;Database=AmeaLegalAdmin;User Id=admin;Password=admin"
+                ConnectionString = "Server=127.0.0.1;Database=test;User Id=admin;Password=admin"
             };
 
             services.AddKhnumServiceBus<PostgreSqlBus, PostgreSqlPublisher, PostgreSqlBusOptions>(

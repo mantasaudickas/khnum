@@ -31,7 +31,7 @@ namespace Khnum.PostgreSql
 
         public PostgreSqlBus(PostgreSqlBusOptions options, ISerializer serializer, ILogger<PostgreSqlBus> logger)
         {
-            _db = new PostgreSqlRepository(_options.Schema.ToLower(), logger);
+            _db = new PostgreSqlRepository(options.Schema.ToLower(), logger);
 
             _options = options;
             _serializer = serializer;
@@ -360,6 +360,8 @@ namespace Khnum.PostgreSql
                             connection.Close();
                         }
                     }
+
+                    break;
                 }
                 catch (Exception e)
                 {

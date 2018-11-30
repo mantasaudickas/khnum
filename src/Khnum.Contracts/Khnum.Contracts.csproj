@@ -4,7 +4,8 @@
     <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageTags>servicebus messaging contracts</PackageTags>
-    <Version>0.1.0</Version>
+    <Version>0.2.0</Version>
+    <PackageProjectUrl>https://github.com/mantasaudickas/khnum</PackageProjectUrl>
   </PropertyGroup>
 
 </Project>

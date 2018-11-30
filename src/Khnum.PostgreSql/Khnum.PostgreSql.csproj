@@ -3,8 +3,9 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
     <PackageTags>servicebus messaging postgresql</PackageTags>
-    <Version>0.1.0</Version>
+    <Version>0.2.0</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageProjectUrl>https://github.com/mantasaudickas/khnum</PackageProjectUrl>
   </PropertyGroup>
 
   <ItemGroup>

@@ -5,7 +5,8 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageTags>servicebus messaging</PackageTags>
     <Description>Service bus abstraction library</Description>
-    <Version>0.1.0</Version>
+    <Version>0.2.0</Version>
+    <PackageProjectUrl>https://github.com/mantasaudickas/khnum</PackageProjectUrl>
   </PropertyGroup>
 
   <ItemGroup>

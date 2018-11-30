@@ -25,7 +25,7 @@ namespace Khnum.Publisher
             collection.AddSingleton<IBus, PostgreSqlBus>();
             collection.AddSingleton(new PostgreSqlBusOptions
             {
-                ConnectionString = "Server=127.0.0.1;Database=AmeaLegalAdmin;User Id=admin;Password=admin"
+                ConnectionString = "Server=127.0.0.1;Database=test;User Id=admin;Password=admin"
             });
             collection.AddSingleton<IPublisher, PostgreSqlPublisher>();
 
