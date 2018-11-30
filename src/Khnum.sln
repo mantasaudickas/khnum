@@ -1,0 +1,55 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.136
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Khnum.Contracts", "Khnum.Contracts\Khnum.Contracts.csproj", "{41A26E45-655E-458F-A7A4-6B56587ACC59}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Khnum", "Khnum\Khnum.csproj", "{6A2877AC-867A-4B4D-A50D-B1953DB8DCBD}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Khnum.Tests.Publisher", "Khnum.Tests.Publisher\Khnum.Tests.Publisher.csproj", "{D0133693-9353-40A7-982C-4A007F06A2B0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Khnum.PostgreSql", "Khnum.PostgreSql\Khnum.PostgreSql.csproj", "{12049EC8-EE9A-4346-8842-09B896A19D6E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Khnum.Tests.AspNetCore", "Khnum.Tests.AspNetCore\Khnum.Tests.AspNetCore.csproj", "{79DEC86A-28D6-4F92-93A5-35453F84A363}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Khnum.Tests.Contracts", "Khnum.Tests.Contracts\Khnum.Tests.Contracts.csproj", "{790D61D3-8688-4448-8072-352B19CEEE45}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{41A26E45-655E-458F-A7A4-6B56587ACC59}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{41A26E45-655E-458F-A7A4-6B56587ACC59}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{41A26E45-655E-458F-A7A4-6B56587ACC59}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{41A26E45-655E-458F-A7A4-6B56587ACC59}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6A2877AC-867A-4B4D-A50D-B1953DB8DCBD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6A2877AC-867A-4B4D-A50D-B1953DB8DCBD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6A2877AC-867A-4B4D-A50D-B1953DB8DCBD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6A2877AC-867A-4B4D-A50D-B1953DB8DCBD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D0133693-9353-40A7-982C-4A007F06A2B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D0133693-9353-40A7-982C-4A007F06A2B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D0133693-9353-40A7-982C-4A007F06A2B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D0133693-9353-40A7-982C-4A007F06A2B0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{12049EC8-EE9A-4346-8842-09B896A19D6E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{12049EC8-EE9A-4346-8842-09B896A19D6E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{12049EC8-EE9A-4346-8842-09B896A19D6E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{12049EC8-EE9A-4346-8842-09B896A19D6E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{79DEC86A-28D6-4F92-93A5-35453F84A363}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{79DEC86A-28D6-4F92-93A5-35453F84A363}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{79DEC86A-28D6-4F92-93A5-35453F84A363}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{79DEC86A-28D6-4F92-93A5-35453F84A363}.Release|Any CPU.Build.0 = Release|Any CPU
+		{790D61D3-8688-4448-8072-352B19CEEE45}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{790D61D3-8688-4448-8072-352B19CEEE45}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{790D61D3-8688-4448-8072-352B19CEEE45}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{790D61D3-8688-4448-8072-352B19CEEE45}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6EB7A095-F7BE-4B5E-91AA-8C13C6AA7BBD}
+	EndGlobalSection
+EndGlobal
