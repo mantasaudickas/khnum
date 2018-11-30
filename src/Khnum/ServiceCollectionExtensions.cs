@@ -3,14 +3,17 @@ using Khnum.Contracts;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Khnum
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddKhnumServiceBus(this IServiceCollection collection, Action<IConsumerRegistry> subscribe)
+        public static IServiceCollection AddKhnumServiceBus<TBus, TPublisher, TBusOptions>(this IServiceCollection collection, TBusOptions busOptions, Action<IConsumerRegistry> subscribe)
+            where TBus: class, IBus
+            where TPublisher: class, IPublisher
+            where TBusOptions: class
         {
-
             if (subscribe != null)
             {
                 var registry = new ConsumerRegistry(collection);
@@ -18,7 +21,10 @@ namespace Khnum
                 collection.AddSingleton<IConsumerRegistry>(registry);
             }
 
-            collection.AddSingleton<ISerializer, Serializer>();
+            collection.TryAddSingleton(busOptions);
+            collection.TryAddSingleton<IBus, TBus>();
+            collection.TryAddSingleton<IPublisher, TPublisher>();
+            collection.TryAddSingleton<ISerializer, Serializer>();
             return collection;
         }
 

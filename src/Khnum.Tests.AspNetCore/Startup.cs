@@ -20,10 +20,17 @@ namespace Khnum.Tests.AspNetCore
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddKhnumPostgreSqlServiceBus(new PostgreSqlBusOptions
+            var options = new PostgreSqlBusOptions
             {
                 ConnectionString = "Server=127.0.0.1;Database=AmeaLegalAdmin;User Id=admin;Password=admin"
-            }, registry => { registry.Subscribe<SendTimeRequest, SendTimeRequestConsumer>("asp-net-core"); });
+            };
+
+            services.AddKhnumServiceBus<PostgreSqlBus, PostgreSqlPublisher, PostgreSqlBusOptions>(
+                options,
+                registry =>
+                {
+                    registry.Subscribe<SendTimeRequest, SendTimeRequestConsumer>("asp-net-core");
+                });
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }

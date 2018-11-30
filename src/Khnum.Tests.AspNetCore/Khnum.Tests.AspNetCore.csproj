@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Khnum.Bus.PostgreSql\Khnum.PostgreSql.csproj" />
+    <ProjectReference Include="..\Khnum.PostgreSql\Khnum.PostgreSql.csproj" />
     <ProjectReference Include="..\Khnum.Contracts\Khnum.Contracts.csproj" />
     <ProjectReference Include="..\Khnum.Tests.Contracts\Khnum.Tests.Contracts.csproj" />
     <ProjectReference Include="..\Khnum\Khnum.csproj" />

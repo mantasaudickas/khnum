@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Khnum.PostgreSql
+namespace Khnum.PostgreSql.Exceptions
 {
     public class CallbackExecutionException: Exception
     {

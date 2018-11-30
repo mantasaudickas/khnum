@@ -14,7 +14,7 @@ namespace Khnum.PostgreSql
 
         public Task PublishAsync<TMessage>(TMessage message)
         {
-            return _bus.SendAsync(message);
+            return _bus.PublishAsync(message);
         }
     }
 }
