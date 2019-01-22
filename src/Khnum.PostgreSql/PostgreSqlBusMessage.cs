@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Khnum.Contracts;
 
 namespace Khnum.PostgreSql
@@ -9,14 +8,12 @@ namespace Khnum.PostgreSql
         public string MessageId { get; }
         public byte[] Body { get; }
         public IDictionary<string, object> Properties { get; }
-        public IServiceProvider ServiceProvider { get; }
 
-        public PostgreSqlBusMessage(string messageId, byte[] body, IDictionary<string, object> properties, IServiceProvider serviceProvider)
+        public PostgreSqlBusMessage(string messageId, byte[] body, IDictionary<string, object> properties)
         {
             MessageId = messageId;
             Body = body;
             Properties = properties;
-            ServiceProvider = serviceProvider;
         }
     }
 }

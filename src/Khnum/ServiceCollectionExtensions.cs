@@ -25,7 +25,6 @@ namespace Khnum
             collection.TryAddSingleton<IBus, TBus>();
             collection.TryAddSingleton<IPublisher, TPublisher>();
             collection.TryAddSingleton<ISerializer, Serializer>();
-            collection.TryAddSingleton<IKhnumScopeFactory, KhnumScopeFactory>();
             return collection;
         }
 

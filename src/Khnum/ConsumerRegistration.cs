@@ -26,10 +26,11 @@ namespace Khnum
         public Task ConsumeAsync(IServiceProvider services, byte[] message, IDictionary<string, object> properties)
         {
             var body = JsonSerializer.Deserialize<TMessage>(message);
-            var context = new MessageContext<TMessage>(body);
 
             using (var scope = services.CreateScope())
             {
+                var context = new MessageContext<TMessage>(body, scope.ServiceProvider);
+
                 using (CreateLoggerScope(scope.ServiceProvider, properties))
                 {
                     var consumer = _createConsumer(scope.ServiceProvider);
