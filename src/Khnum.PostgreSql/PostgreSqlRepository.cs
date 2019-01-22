@@ -69,57 +69,80 @@ namespace Khnum.PostgreSql
 
         public Task<QueueMessage> FetchQueueMessageAsync(NpgsqlConnection connection, Guid queueMessageId)
         {
-            string sql = $"SELECT queuemessageid, queueid, body, properties, state, statedescription, stateprocessor, created, updated " +
-                         $"FROM {_schemaName}.queuemessages " +
-                         $"WHERE queuemessageid = '{queueMessageId}'";
+            string sql = "  SELECT queuemessageid, queueid, body, properties, state, statedescription, stateprocessor, created, updated " +
+                         $" FROM {_schemaName}.queuemessages " +
+                         "  WHERE queuemessageid = :queueMessageId";
 
-            return connection.QueryFirstOrDefaultAsync<QueueMessage>(sql);
+            return connection.QueryFirstOrDefaultAsync<QueueMessage>(sql, new {queueMessageId});
         }
 
         public Task<Guid?> FetchNextQueueMessageId(NpgsqlConnection connection, Queue queue, string stateProcessor)
         {
             var sql = $" UPDATE {_schemaName}.queuemessages" +
-                      $" SET state = '{MessageState.Processing}', Updated = clock_timestamp(), StateProcessor = '{stateProcessor}'" +
-                      $" WHERE queuemessageid = (" +
-                      $"    select queuemessageid from {_schemaName}.queuemessages WHERE QueueId = {queue.QueueId} AND State = '{MessageState.Queued}' ORDER BY created ASC LIMIT 1 FOR UPDATE SKIP LOCKED)" +
-                      $" RETURNING queuemessageid";
+                      "  SET state = :processingState, Updated = clock_timestamp(), StateProcessor = :stateProcessor" +
+                      "  WHERE queuemessageid = (" +
+                      $"    select queuemessageid from {_schemaName}.queuemessages WHERE QueueId = :queueId AND State = :queuedState ORDER BY created ASC LIMIT 1 FOR UPDATE SKIP LOCKED)" +
+                      "  RETURNING queuemessageid";
 
-            return connection.ExecuteScalarAsync<Guid?>(sql);
+            return connection.ExecuteScalarAsync<Guid?>(sql, new
+            {
+                queueId = queue.QueueId,
+                stateProcessor,
+                processingState = MessageState.Processing.ToString(),
+                queuedState = MessageState.Queued.ToString()
+            });
         }
 
         public Task UpdateMessageState(NpgsqlConnection connection, Guid queueMessageId, string stateDescription, MessageState messageState)
         {
-            string sql = $"UPDATE {_schemaName}.queuemessages " +
-                         $"SET state = '{messageState}', Updated = clock_timestamp(), StateDescription = '{stateDescription}' " +
-                         $"WHERE queuemessageid = '{queueMessageId}'";
+            var sql = $"UPDATE {_schemaName}.queuemessages " +
+                      " SET state =:messageState, Updated = clock_timestamp(), StateDescription = :stateDescription " +
+                      " WHERE queuemessageid = :queueMessageId";
 
-            return connection.ExecuteAsync(sql);
+            return connection.QueryAsync(sql, new
+            {
+                messageState = messageState.ToString(),
+                stateDescription,
+                queueMessageId
+            });
         }
 
         public Task<IEnumerable<Queue>> FetchQueues(NpgsqlConnection connection, string routingKey)
         {
             string sql = $"SELECT queueid, name, routingkey " +
                          $"FROM {_schemaName}.queues " +
-                         $"WHERE routingkey = '{routingKey}'";
-            return connection.QueryAsync<Queue>(sql);
+                         $"WHERE routingkey = :routingKey";
+
+            return connection.QueryAsync<Queue>(sql, new {routingKey});
         }
 
         public Task InsertNewMessage(NpgsqlConnection connection, Queue queue, string body, string propertyBody)
         {
             string sql = $"INSERT INTO {_schemaName}.queuemessages (QueueId, Body, Properties, State) " +
-                         $"VALUES ({queue.QueueId}, '{body}', '{propertyBody}', '{MessageState.Queued}');";
-            return connection.ExecuteAsync(sql);
+                         " VALUES (:queueId, :body, :propertyBody, :queuedState);";
+
+            return connection.ExecuteAsync(sql, new
+            {
+                queueId = queue.QueueId,
+                body,
+                propertyBody,
+                queuedState = MessageState.Queued.ToString()
+            });
         }
 
         public Task InsertQueue(NpgsqlConnection connection, string queueName, string routingKey)
         {
-            var sql = $"INSERT INTO {_schemaName}.queues(Name, RoutingKey) VALUES('{queueName}', '{routingKey}') ON CONFLICT (Name) DO NOTHING";
-            return connection.ExecuteAsync(sql);
+            var sql = $"INSERT INTO {_schemaName}.queues(Name, RoutingKey) VALUES(:queueName, :routingKey) ON CONFLICT (Name) DO NOTHING";
+            return connection.ExecuteAsync(sql, new
+            {
+                queueName,
+                routingKey
+            });
         }
 
         public Task<IEnumerable<Queue>> FetchQueue(NpgsqlConnection connection, string queueName)
         {
-            return connection.QueryAsync<Queue>($"SELECT QueueId, Name FROM {_schemaName}.queues WHERE Name = '{queueName}'");
+            return connection.QueryAsync<Queue>($"SELECT QueueId, Name FROM {_schemaName}.queues WHERE Name = :queueName", new {queueName});
         }
     }
 }

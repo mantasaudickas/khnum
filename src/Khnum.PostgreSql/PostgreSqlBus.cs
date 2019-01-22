@@ -25,15 +25,17 @@ namespace Khnum.PostgreSql
         private readonly PostgreSqlRepository _db;
 
         private readonly PostgreSqlBusOptions _options;
+        private readonly IKhnumScopeFactory _scopeFactory;
         private readonly ISerializer _serializer;
         private readonly ILogger<PostgreSqlBus> _logger;
         private readonly string _processorName;
 
-        public PostgreSqlBus(PostgreSqlBusOptions options, ISerializer serializer, ILogger<PostgreSqlBus> logger)
+        public PostgreSqlBus(PostgreSqlBusOptions options, IKhnumScopeFactory scopeFactory, ISerializer serializer, ILogger<PostgreSqlBus> logger)
         {
             _db = new PostgreSqlRepository(options.Schema.ToLower(), logger);
 
             _options = options;
+            _scopeFactory = scopeFactory;
             _serializer = serializer;
             _logger = logger;
             _processorName = $"{MachineName}:{Process.GetCurrentProcess().Id}";
@@ -233,9 +235,12 @@ namespace Khnum.PostgreSql
                                 var messageId = queueMessage.QueueMessageId.ToString();
                                 var body = Encoding.UTF8.GetBytes(queueMessage.Body);
                                 var properties = _serializer.Deserialize<IDictionary<string, object>>(queueMessage.Properties);
-                                var busMessage = new PostgreSqlBusMessage(messageId, body, properties);
 
-                                callbackCounter = await ProcessMessageCallbacks(connection, busMessage, callbacks, queueMessageId.Value).ConfigureAwait(false);
+                                using (var scope = _scopeFactory.CreateScope())
+                                {
+                                    var busMessage = new PostgreSqlBusMessage(messageId, body, properties, scope.Services);
+                                    callbackCounter = await ProcessMessageCallbacks(connection, busMessage, callbacks, queueMessageId.Value).ConfigureAwait(false);
+                                }
                             }
 
                             await transaction.CommitAsync().ConfigureAwait(false);
@@ -265,6 +270,7 @@ namespace Khnum.PostgreSql
         private async Task<int> ProcessMessageCallbacks(NpgsqlConnection connection, PostgreSqlBusMessage message, List<Func<IBusMessage, Task>> callbacks, Guid queueMessageId)
         {
             var timer = Stopwatch.StartNew();
+
             for (var i = 0; i < callbacks.Count; i++)
             {
                 var callback = callbacks[i];
@@ -278,7 +284,6 @@ namespace Khnum.PostgreSql
                     throw new CallbackExecutionException(i, queueMessageId, e);
                 }
             }
-            timer.Stop();
 
             await _db.UpdateMessageState(connection, queueMessageId, $"Time spent={timer.Elapsed};", MessageState.Completed).ConfigureAwait(false);
 

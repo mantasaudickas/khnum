@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Khnum.Contracts
 {
@@ -9,5 +8,6 @@ namespace Khnum.Contracts
         string MessageId { get; }
         byte[] Body { get; }
         IDictionary<string, object> Properties { get; }
+        IServiceProvider ServiceProvider { get; }
     }
 }

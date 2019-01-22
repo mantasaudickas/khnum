@@ -4,8 +4,15 @@
     <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageTags>servicebus messaging contracts</PackageTags>
-    <Version>0.2.0</Version>
+    <Version>0.3.0</Version>
     <PackageProjectUrl>https://github.com/mantasaudickas/khnum</PackageProjectUrl>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
   </PropertyGroup>
 
+  <ItemGroup>
+      <None Include="..\..\LICENSE" Link="license\LICENSE">
+          <Pack>true</Pack>
+          <PackagePath></PackagePath>
+      </None>
+  </ItemGroup>
 </Project>

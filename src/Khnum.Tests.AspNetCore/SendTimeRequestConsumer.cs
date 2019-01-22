@@ -20,4 +20,12 @@ namespace Khnum.Tests.AspNetCore
             return Task.CompletedTask;
         }
     }
+
+    public class FailProcessingRequestConsumer : IConsumer<FailProcessingRequest>
+    {
+        public Task ConsumeAsync(IMessageContext<FailProcessingRequest> message)
+        {
+            throw new System.NotImplementedException("By intention!");
+        }
+    }
 }

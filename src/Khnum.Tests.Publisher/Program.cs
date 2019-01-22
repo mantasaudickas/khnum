@@ -13,21 +13,17 @@ namespace Khnum.Publisher
         static async Task Main(string[] args)
         {
             var collection = new ServiceCollection();
-
-            var registry = new ConsumerRegistry(collection);
-            registry.Subscribe<SendTimeRequest, SendTimeRequestConsumer>("consumer-id-x");
-            registry.Subscribe<SendTimeRequest, SendTimeRequestConsumer>("consumer-id-y");
-
             collection.AddLogging(builder => builder.SetMinimumLevel(LogLevel.Debug).AddConsole());
-
-            collection.AddSingleton<ISerializer, Serializer>();
-            collection.AddSingleton<IConsumerRegistry>(registry);
-            collection.AddSingleton<IBus, PostgreSqlBus>();
-            collection.AddSingleton(new PostgreSqlBusOptions
-            {
-                ConnectionString = "Server=127.0.0.1;Database=test;User Id=admin;Password=admin"
-            });
-            collection.AddSingleton<IPublisher, PostgreSqlPublisher>();
+            collection.AddKhnumServiceBus<PostgreSqlBus, PostgreSqlPublisher, PostgreSqlBusOptions>(
+                new PostgreSqlBusOptions
+                {
+                    ConnectionString = "Server=127.0.0.1;Database=test;User Id=admin;Password=admin"
+                },
+                registry =>
+                {
+                    registry.Subscribe<SendTimeRequest, SendTimeRequestConsumer>("consumer-id-x");
+                    registry.Subscribe<SendTimeRequest, SendTimeRequestConsumer>("consumer-id-y");
+                });
 
             var services = collection.BuildServiceProvider(true);
 
@@ -41,7 +37,16 @@ namespace Khnum.Publisher
                     break;
 
                 var publisher = services.GetRequiredService<IPublisher>();
-                await publisher.PublishAsync(new SendTimeRequest {Time = DateTime.Now}).ConfigureAwait(false);
+
+                switch (key.Key)
+                {
+                    case ConsoleKey.Q:
+                        await publisher.PublishAsync(new FailProcessingRequest()).ConfigureAwait(false);
+                        break;
+                    default:
+                        await publisher.PublishAsync(new SendTimeRequest {Time = DateTime.Now}).ConfigureAwait(false);
+                        break;
+                }
             }
         }
 

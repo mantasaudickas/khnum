@@ -29,7 +29,9 @@ namespace Khnum.Tests.AspNetCore
                 options,
                 registry =>
                 {
-                    registry.Subscribe<SendTimeRequest, SendTimeRequestConsumer>("asp-net-core");
+                    registry
+                        .Subscribe<SendTimeRequest, SendTimeRequestConsumer>("asp-net-core")
+                        .Subscribe<FailProcessingRequest, FailProcessingRequestConsumer>("asp-net-core");
                 });
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
