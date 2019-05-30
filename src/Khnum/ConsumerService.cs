@@ -24,8 +24,8 @@ namespace Khnum
             foreach (var registration in _registrations)
             {
                 var queueName = $"{registration.MessageType}:{registration.ConsumerId}".ToLower();
-                var routingkey = $"{registration.MessageType}".ToLower();
-                _bus.RegisterCallback(queueName, routingkey, message => registration.ConsumeAsync(services, message.Body, message.Properties));
+                var routingKey = $"{registration.MessageType}".ToLower();
+                _bus.RegisterCallback(registration.ConsumerId, queueName, routingKey, message => registration.ConsumeAsync(services, message.Body, message.Properties));
             }
 
             return _bus.StartReceivers();

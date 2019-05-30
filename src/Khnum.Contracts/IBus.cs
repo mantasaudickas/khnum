@@ -6,7 +6,7 @@ namespace Khnum.Contracts
     public interface IBus: IDisposable
     {
         Task PublishAsync<TMessage>(TMessage message);
-        void RegisterCallback(string queueName, string routingKey, Func<IBusMessage, Task> callback);
+        void RegisterCallback(string consumerId, string queueName, string routingKey, Func<IBusMessage, Task> callback);
         Task StartReceivers();
     }
 }

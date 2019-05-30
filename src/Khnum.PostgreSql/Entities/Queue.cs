@@ -5,5 +5,6 @@
         public int QueueId { get; set; }
         public string Name { get; set; }
         public string RoutingKey { get; set; }
+        public string ServiceName { get; set; }
     }
 }
