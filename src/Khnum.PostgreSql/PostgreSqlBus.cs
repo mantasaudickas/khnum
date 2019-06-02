@@ -21,8 +21,9 @@ namespace Khnum.PostgreSql
         private static readonly string MachineName = Dns.GetHostName();
 
         private readonly ConcurrentDictionary<string, CallbackInfo> _callbacks = new ConcurrentDictionary<string, CallbackInfo>(StringComparer.OrdinalIgnoreCase);
+        
         private readonly CancellationTokenSource _tokens = new CancellationTokenSource();
-        private bool _finished = true;
+        private readonly CancellationTokenSource _processorCancellationToken = new CancellationTokenSource();
 
         private readonly PostgreSqlRepository _db;
 
@@ -30,6 +31,8 @@ namespace Khnum.PostgreSql
         private readonly ISerializer _serializer;
         private readonly ILogger<PostgreSqlBus> _logger;
         private readonly string _processorName;
+
+        private readonly List<Task> _taskList = new List<Task>();
 
         public PostgreSqlBus(PostgreSqlBusOptions options, ISerializer serializer, ILogger<PostgreSqlBus> logger)
         {
@@ -41,11 +44,27 @@ namespace Khnum.PostgreSql
             _processorName = $"{MachineName}:{Process.GetCurrentProcess().Id}";
         }
 
+        public void Dispose()
+        {
+            // try graceful shutdown..
+            _tokens.Cancel();
+
+            if (_taskList.Count > 0)
+            {
+                // wait for shutdown
+                Task.WaitAll(_taskList.ToArray(), TimeSpan.FromSeconds(20));
+                _taskList.Clear();
+            }
+
+            // force task cancellation..
+            _processorCancellationToken.Cancel();
+
+            _tokens.Dispose();
+        }
+
         public async Task StartReceivers()
         {
             await InitializeSchemaAsync().ConfigureAwait(false);
-
-            _finished = false;
 
             var queueList = _callbacks.Keys.Select(s => s.ToLower()).ToList();
             if (queueList.Count > 0)
@@ -106,44 +125,52 @@ namespace Khnum.PostgreSql
                 {
                     if (_options.RetentionPeriod > TimeSpan.Zero)
                     {
-                        await Task.Factory
-                            .StartNew(() => RetentionProcess(_options.RetentionPeriod, queues), TaskCreationOptions.DenyChildAttach)
+                        var retentionTask = await Task.Factory
+                            .StartNew(() => RetentionProcess(_options.RetentionPeriod, queues), _tokens.Token, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default)
                             .ConfigureAwait(false);
+                        _taskList.Add(retentionTask);
                     }
                     
-                    await Task.Factory
-                        .StartNew(() => StartQueueProcessor(queues), TaskCreationOptions.DenyChildAttach)
+                    var processorTask = await Task.Factory
+                        .StartNew(() => StartQueueProcessor(queues), _processorCancellationToken.Token, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default)
                         .ConfigureAwait(false);
-                }
-                else
-                {
-                    _finished = true;
+                    _taskList.Add(processorTask);
                 }
             }
         }
 
         private async Task RetentionProcess(TimeSpan retentionPeriod, List<(Queue Queue, CallbackInfo Info)> queues)
         {
-            while (true)
+            try
             {
-                var untilDateTime = DateTime.UtcNow.Subtract(retentionPeriod);
-                _logger.LogInformation(
-                    "Starting expired message retention. Messages which updated before {ExpirationDate} will be deleted.",
-                    untilDateTime);
-
-                foreach (var tuple in queues)
+                while (true)
                 {
-                    try
-                    {
-                        await DeleteExpiredMessages(tuple.Queue.QueueId, untilDateTime).ConfigureAwait(false);
-                    }
-                    catch (Exception e)
-                    {
-                        _logger.LogWarning(e, $"Khnum message retention failed");
-                    }
-                }
+                    var untilDateTime = DateTime.UtcNow.Subtract(retentionPeriod);
+                    _logger.LogInformation(
+                        "Starting expired message retention. Messages which updated before {ExpirationDate} will be deleted.",
+                        untilDateTime);
 
-                await Task.Delay(TimeSpan.FromHours(1), _tokens.Token);
+                    foreach (var tuple in queues)
+                    {
+                        try
+                        {
+                            await DeleteExpiredMessages(tuple.Queue.QueueId, untilDateTime).ConfigureAwait(false);
+                        }
+                        catch (Exception e)
+                        {
+                            _logger.LogWarning(e, $"Khnum message retention failed");
+                        }
+                    }
+
+                    await Task.Delay(TimeSpan.FromHours(1), _tokens.Token);
+                }
+            }
+            catch (TaskCanceledException)
+            {
+            }
+            catch (Exception e)
+            {
+                Trace.WriteLine($"Retention process stopped with error: {e}.");
             }
         }
 
@@ -212,33 +239,6 @@ namespace Khnum.PostgreSql
             }
         }
 
-        public void Stop()
-        {
-            if (!_tokens.IsCancellationRequested)
-            {
-                _tokens.Cancel();
-            }
-        }
-
-        public void Dispose()
-        {
-            Stop();
-
-            for (int i = 0; i < 30; i++)
-            {
-                if (!_finished)
-                {
-                    Thread.Sleep(TimeSpan.FromSeconds(2));
-                }
-                else
-                {
-                    break;
-                }
-            }
-
-            _tokens.Dispose();
-        }
-
         private async Task StartQueueProcessor(List<(Queue Queue, CallbackInfo Info)> queues)
         {
             try
@@ -291,16 +291,14 @@ namespace Khnum.PostgreSql
                     }
                 }
 
-                _logger.LogInformation("Finished processing loop. Executed {CallbackCount} callbacks.",
-                    callbackCounter);
+                _logger.LogInformation("Finished processing loop. Executed {CallbackCount} callbacks.", callbackCounter);
+            }
+            catch (TaskCanceledException)
+            {
             }
             catch (Exception e)
             {
                 _logger.LogError(e, "StartQueueProcessor failed");
-            }
-            finally
-            {
-                _finished = true;
             }
         }
 

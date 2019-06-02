@@ -29,7 +29,7 @@ namespace Khnum.Tests.Publisher
 
             var services = collection.BuildServiceProvider(true);
 
-            using (var consumer = await StartConsumer(services).ConfigureAwait(false))
+            using (await StartConsumer(services).ConfigureAwait(false))
             {
                 while (true)
                 {
