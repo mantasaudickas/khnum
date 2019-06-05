@@ -44,22 +44,50 @@ namespace Khnum.PostgreSql
             _processorName = $"{MachineName}:{Process.GetCurrentProcess().Id}";
         }
 
+        public void Stop()
+        {
+            var timer = Stopwatch.StartNew();
+            _logger.LogDebug("Stopping khnum background services..");
+            try
+            {
+                if (!_tokens.IsCancellationRequested)
+                {
+                    _logger.LogDebug("Notifying background components about shutdown..");
+                    // try graceful shutdown..
+                    _tokens.Cancel();
+                }
+
+                if (_taskList.Count > 0)
+                {
+                    _logger.LogDebug("Waiting to shutdown {BackgroundTaskCount} background tasks", _taskList.Count);
+
+                    // wait for shutdown
+                    Task.WaitAll(_taskList.ToArray(), TimeSpan.FromSeconds(5));
+                    _taskList.Clear();
+                }
+
+                if (!_processorCancellationToken.IsCancellationRequested)
+                {
+                    _logger.LogDebug("Forcing background component shutdown..");
+                    // force task cancellation..
+                    _processorCancellationToken.Cancel();
+                }
+
+                _logger.LogDebug("Stopped khnum background services in {Duration}ms", timer.ElapsedMilliseconds);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Unable to stop bus...");
+                throw;
+            }
+        }
+
         public void Dispose()
         {
-            // try graceful shutdown..
-            _tokens.Cancel();
-
-            if (_taskList.Count > 0)
-            {
-                // wait for shutdown
-                Task.WaitAll(_taskList.ToArray(), TimeSpan.FromSeconds(20));
-                _taskList.Clear();
-            }
-
-            // force task cancellation..
-            _processorCancellationToken.Cancel();
+            Stop();
 
             _tokens.Dispose();
+            _processorCancellationToken.Dispose();
         }
 
         public async Task StartReceivers()
@@ -262,8 +290,7 @@ namespace Khnum.PostgreSql
                         {
                             using (var transaction = connection.BeginTransaction(IsolationLevel.ReadCommitted))
                             {
-                                callbackCounterInt = await TryReceive(connection, stateProcessor, queueIds, callbackMap)
-                                    .ConfigureAwait(false);
+                                callbackCounterInt = await TryReceive(connection, stateProcessor, queueIds, callbackMap).ConfigureAwait(false);
                                 await transaction.CommitAsync().ConfigureAwait(false);
                             }
                         }
@@ -275,8 +302,7 @@ namespace Khnum.PostgreSql
                         }
                         catch (Exception e)
                         {
-                            _logger.LogError(e, "Queue processing failed! State processor: {StateProcessor}.",
-                                stateProcessor);
+                            _logger.LogError(e, "Queue processing failed! State processor: {StateProcessor}.", stateProcessor);
                         }
                     }
 
@@ -287,7 +313,7 @@ namespace Khnum.PostgreSql
 
                     if (callbackCounterInt == 0 && _options.SleepTime > TimeSpan.Zero)
                     {
-                        await Task.Delay(_options.SleepTime).ConfigureAwait(false);
+                        await Task.Delay(_options.SleepTime, _tokens.Token).ConfigureAwait(false);
                     }
                 }
 

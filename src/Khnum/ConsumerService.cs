@@ -31,6 +31,11 @@ namespace Khnum
             return _bus.StartReceivers();
         }
 
+        public void Stop()
+        {
+            _bus.Stop();
+        }
+
         public void Dispose()
         {
             _bus.Dispose();

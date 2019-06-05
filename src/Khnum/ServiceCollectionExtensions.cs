@@ -18,7 +18,7 @@ namespace Khnum
             {
                 var registry = new ConsumerRegistry(collection);
                 subscribe(registry);
-                collection.AddSingleton<IConsumerRegistry>(registry);
+                collection.AddSingleton<IConsumerRegistry>(p => registry);
             }
 
             collection.TryAddSingleton(busOptions);
@@ -39,7 +39,7 @@ namespace Khnum
                 var bus = services.GetRequiredService<IBus>();
                 var consumers = registry.CreateService(bus);
                 lifetime.ApplicationStarted.Register(async () => await consumers.StartConsumersAsync(app.ApplicationServices).ConfigureAwait(false));
-                lifetime.ApplicationStopping.Register(() => consumers.Dispose());
+                lifetime.ApplicationStopping.Register(() => { consumers.Stop(); });
             }
 
             return app;
